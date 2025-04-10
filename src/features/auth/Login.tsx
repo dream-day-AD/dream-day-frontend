@@ -27,7 +27,8 @@ const Login = () => {
       const { token, role } = response.data as {
         token: string;
         role: 'client' | 'planner' | 'admin';
-      }; // Type response
+      };
+      localStorage.setItem('token', token); // Store token for API requests
       dispatch(login({ token, role }));
       toast.success('Login successful!');
       navigate('/dashboard');
@@ -62,6 +63,7 @@ const Login = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="bg-gray-800 text-white"
+                  aria-label="Email address"
                 />
               </div>
               <div>
@@ -73,6 +75,7 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   className="bg-gray-800 text-white"
+                  aria-label="Password"
                 />
               </div>
               <Button type="submit" disabled={loading} className="w-full">

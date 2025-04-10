@@ -13,7 +13,7 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [role, setRole] = useState<'client' | 'planner' | 'admin'>('client'); // Include 'admin'
+  const [role, setRole] = useState<'client' | 'planner' | 'admin'>('client');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -55,6 +55,7 @@ const Register = () => {
                   onChange={(e) => setName(e.target.value)}
                   required
                   className="bg-gray-800 text-white"
+                  aria-label="Full name"
                 />
               </div>
               <div>
@@ -66,6 +67,7 @@ const Register = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="bg-gray-800 text-white"
+                  aria-label="Email address"
                 />
               </div>
               <div>
@@ -77,6 +79,7 @@ const Register = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   className="bg-gray-800 text-white"
+                  aria-label="Password"
                 />
               </div>
               <div>
@@ -86,12 +89,13 @@ const Register = () => {
                   value={role}
                   onChange={(e) =>
                     setRole(e.target.value as 'client' | 'planner' | 'admin')
-                  } // Update type
+                  }
                   className="w-full p-2 bg-gray-800 text-white rounded-md"
+                  aria-label="User role"
                 >
                   <option value="client">Client</option>
                   <option value="planner">Planner</option>
-                  <option value="admin">Admin</option> {/* Add Admin option */}
+                  <option value="admin">Admin</option>
                 </select>
               </div>
               <Button type="submit" disabled={loading} className="w-full">
