@@ -32,7 +32,7 @@ import Papa from 'papaparse';
 import { MoreHorizontal } from 'lucide-react';
 
 interface Guest {
-  id: string;
+  id: number; // Backend uses int
   name: string;
   email: string;
   rsvp: 'yes' | 'no' | 'maybe' | 'pending';
@@ -50,16 +50,12 @@ interface CSVGuestRow {
 
 const GuestList = () => {
   const [newGuest, setNewGuest] = useState({ name: '', email: '' });
-  const [editingSeatingId, setEditingSeatingId] = useState<string | null>(null);
+  const [editingSeatingId, setEditingSeatingId] = useState<number | null>(null);
   const [seatingValue, setSeatingValue] = useState('');
-  const [searchQuery, setSearchQuery] = useState(''); // Add search state
+  const [searchQuery, setSearchQuery] = useState('');
   const queryClient = useQueryClient();
 
-  const {
-    data: guests = [],
-    isLoading,
-    error,
-  } = useQuery<Guest[]>({
+  const { data: guests = [], isLoading, error } = useQuery<Guest[]>({
     queryKey: ['guests'],
     queryFn: async () => {
       const response = await api.get('/guests');
@@ -84,26 +80,21 @@ const GuestList = () => {
   });
 
   const updateRSVPMutation = useMutation({
-    mutationFn: ({ id, rsvp }: { id: string; rsvp: Guest['rsvp'] }) =>
+    mutationFn: ({ id, rsvp }: { id: number; rsvp: Guest['rsvp'] }) =>
       api.patch(`/guests/${id}`, { rsvp }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['guests'] }),
     onError: () => toast.error('Failed to update RSVP.'),
   });
 
   const updateMealMutation = useMutation({
-    mutationFn: ({
-      id,
-      mealPreference,
-    }: {
-      id: string;
-      mealPreference: Guest['mealPreference'];
-    }) => api.patch(`/guests/${id}`, { mealPreference }),
+    mutationFn: ({ id, mealPreference }: { id: number; mealPreference: Guest['mealPreference'] }) =>
+      api.patch(`/guests/${id}`, { mealPreference }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['guests'] }),
     onError: () => toast.error('Failed to update meal preference.'),
   });
 
   const updateSeatingMutation = useMutation({
-    mutationFn: ({ id, seating }: { id: string; seating: string }) =>
+    mutationFn: ({ id, seating }: { id: number; seating: string }) =>
       api.patch(`/guests/${id}`, { seating }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['guests'] });
@@ -114,7 +105,7 @@ const GuestList = () => {
   });
 
   const deleteGuestMutation = useMutation({
-    mutationFn: (id: string) => api.delete(`/guests/${id}`),
+    mutationFn: (id: number) => api.delete(`/guests/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['guests'] });
       toast.success('Guest removed successfully!');
@@ -134,8 +125,7 @@ const GuestList = () => {
             name: row.name || '',
             email: row.email || '',
             rsvp: (row.rsvp as Guest['rsvp']) || 'pending',
-            mealPreference:
-              (row.mealPreference as Guest['mealPreference']) || 'none',
+            mealPreference: (row.mealPreference as Guest['mealPreference']) || 'none',
             seating: row.seating || '',
           }))
           .filter((g) => g.name && g.email);
@@ -151,7 +141,7 @@ const GuestList = () => {
     if (newGuest.name && newGuest.email) addGuestMutation.mutate(newGuest);
   };
 
-  const handleUpdateSeating = (id: string) => {
+  const handleUpdateSeating = (id: number) => {
     if (seatingValue.trim()) {
       updateSeatingMutation.mutate({ id, seating: seatingValue });
     }
@@ -170,12 +160,8 @@ const GuestList = () => {
       guest.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  if (isLoading)
-    return <div className="p-6 text-center">Loading guests...</div>;
-  if (error)
-    return (
-      <div className="p-6 text-center text-red-500">Error loading guests</div>
-    );
+  if (isLoading) return <div className="p-6 text-center">Loading guests...</div>;
+  if (error) return <div className="p-6 text-center text-red-500">Error loading guests</div>;
 
   return (
     <div className="p-6 space-y-6">
@@ -186,9 +172,7 @@ const GuestList = () => {
         <CardHeader>
           <CardTitle>Your Guests</CardTitle>
           <div className="text-sm text-gray-400">
-            Total Guests: {guests.length} | Yes: {rsvpCounts.yes} | No:{' '}
-            {rsvpCounts.no} | Maybe: {rsvpCounts.maybe} | Pending:{' '}
-            {rsvpCounts.pending}
+            Total Guests: {guests.length} | Yes: {rsvpCounts.yes} | No: {rsvpCounts.no} | Maybe: {rsvpCounts.maybe} | Pending: {rsvpCounts.pending}
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -197,17 +181,13 @@ const GuestList = () => {
               <Input
                 placeholder="Name"
                 value={newGuest.name}
-                onChange={(e) =>
-                  setNewGuest({ ...newGuest, name: e.target.value })
-                }
+                onChange={(e) => setNewGuest({ ...newGuest, name: e.target.value })}
                 className="bg-gray-800 text-white"
               />
               <Input
                 placeholder="Email"
                 value={newGuest.email}
-                onChange={(e) =>
-                  setNewGuest({ ...newGuest, email: e.target.value })
-                }
+                onChange={(e) => setNewGuest({ ...newGuest, email: e.target.value })}
                 className="bg-gray-800 text-white"
               />
               <Button type="submit" disabled={addGuestMutation.isPending}>
@@ -260,16 +240,10 @@ const GuestList = () => {
                     <Select
                       value={guest.rsvp}
                       onValueChange={(value) =>
-                        updateRSVPMutation.mutate({
-                          id: guest.id,
-                          rsvp: value as Guest['rsvp'],
-                        })
+                        updateRSVPMutation.mutate({ id: guest.id, rsvp: value as Guest['rsvp'] })
                       }
                     >
-                      <SelectTrigger
-                        className="w-32 bg-gray-800 text-white"
-                        aria-label={`RSVP for ${guest.name}`}
-                      >
+                      <SelectTrigger className="w-32 bg-gray-800 text-white" aria-label={`RSVP for ${guest.name}`}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -290,17 +264,12 @@ const GuestList = () => {
                         })
                       }
                     >
-                      <SelectTrigger
-                        className="w-32 bg-gray-800 text-white"
-                        aria-label={`Meal preference for ${guest.name}`}
-                      >
+                      <SelectTrigger className="w-32 bg-gray-800 text-white" aria-label={`Meal preference for ${guest.name}`}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="vegetarian">Vegetarian</SelectItem>
-                        <SelectItem value="non-vegetarian">
-                          Non-Vegetarian
-                        </SelectItem>
+                        <SelectItem value="non-vegetarian">Non-Vegetarian</SelectItem>
                         <SelectItem value="vegan">Vegan</SelectItem>
                         <SelectItem value="none">None</SelectItem>
                       </SelectContent>
@@ -331,18 +300,12 @@ const GuestList = () => {
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          aria-label={`More actions for ${guest.name}`}
-                        >
+                        <Button variant="ghost" size="sm" aria-label={`More actions for ${guest.name}`}>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent className="bg-gray-800 text-white">
-                        <DropdownMenuItem
-                          onClick={() => deleteGuestMutation.mutate(guest.id)}
-                        >
+                        <DropdownMenuItem onClick={() => deleteGuestMutation.mutate(guest.id)}>
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>

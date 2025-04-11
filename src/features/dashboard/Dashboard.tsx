@@ -9,21 +9,28 @@ import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 
 interface DashboardData {
-  todos: { id: string; task: string; completed: boolean }[];
-  budget: { total: number; spent: number };
-  keyDates: { event: string; date: string }[];
+  todos: string[];
+  budgetOverview: { total: number; spent: number };
+  keyDates: string[];
+  role?: string;
 }
 
 export const Dashboard = () => {
-  const { role } = useSelector((state: RootState) => state.auth);
+  const { role, token } = useSelector((state: RootState) => state.auth);
 
   const { data, isLoading, error } = useQuery<DashboardData>({
     queryKey: ['dashboard', role],
     queryFn: async () => {
+      if (!token) throw new Error('No token available');
+      console.log('Fetching dashboard with token:', token);
       const response = await api.get('/dashboard');
+      console.log('Dashboard response status:', response.status);
+      console.log('Dashboard response data:', response.data);
+      if (!response.data) throw new Error('Empty response from server');
       return response.data;
     },
-    enabled: !!role,
+    enabled: !!token && !!role,
+    retry: false,
   });
 
   const cardVariants = {
@@ -38,10 +45,8 @@ export const Dashboard = () => {
   };
 
   if (isLoading) return <div className="p-6 text-center">Loading...</div>;
-  if (error)
-    return (
-      <div className="p-6 text-center text-red-500">Error loading data</div>
-    );
+  if (error) return <div className="p-6 text-center text-red-500">Error loading data: {error.message}</div>;
+  if (!data) return <div className="p-6 text-center">No data available</div>;
 
   return (
     <div className="p-6 space-y-6">
@@ -50,8 +55,8 @@ export const Dashboard = () => {
         {role === 'client'
           ? 'Your Wedding Dashboard'
           : role === 'planner'
-            ? 'Planner Dashboard'
-            : 'Admin Dashboard'}
+          ? 'Planner Dashboard'
+          : 'Admin Dashboard'}
       </h2>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -62,13 +67,8 @@ export const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <ul className="list-disc pl-5 space-y-2">
-                {data?.todos.map((todo) => (
-                  <li
-                    key={todo.id}
-                    className={todo.completed ? 'line-through' : ''}
-                  >
-                    {todo.task}
-                  </li>
+                {data.todos.map((todo, index) => (
+                  <li key={index}>{todo}</li>
                 ))}
               </ul>
               <Button className="mt-4" onClick={handleTestToast}>
@@ -84,8 +84,8 @@ export const Dashboard = () => {
               <CardTitle>Budget Overview</CardTitle>
             </CardHeader>
             <CardContent>
-              <p>Total Budget: ${data?.budget.total.toLocaleString()}</p>
-              <p>Spent: ${data?.budget.spent.toLocaleString()}</p>
+              <p>Total Budget: ${data.budgetOverview.total.toLocaleString()}</p>
+              <p>Spent: ${data.budgetOverview.spent.toLocaleString()}</p>
               <Button variant="outline" className="mt-4">
                 View Details
               </Button>
@@ -99,8 +99,8 @@ export const Dashboard = () => {
               <CardTitle>Key Dates</CardTitle>
             </CardHeader>
             <CardContent>
-              {data?.keyDates.map((date) => (
-                <p key={date.event}>{`${date.event}: ${date.date}`}</p>
+              {data.keyDates.map((date, index) => (
+                <p key={index}>{date}</p>
               ))}
               <Button variant="outline" className="mt-4">
                 View Timeline

@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDispatch } from 'react-redux';
 import { login } from '@/features/auth/authSlice';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom'; // ⬅ added Link
 import api from '@/lib/api';
 import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/sonner';
@@ -17,6 +17,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,14 +25,17 @@ const Login = () => {
 
     try {
       const response = await api.post('/auth/login', { email, password });
-      const { token, role } = response.data as {
+      const { token, role, name } = response.data as {
         token: string;
         role: 'client' | 'planner' | 'admin';
+        name: string;
       };
-      localStorage.setItem('token', token); // Store token for API requests
-      dispatch(login({ token, role }));
+      dispatch(login({ token, role, name }));
       toast.success('Login successful!');
-      navigate('/dashboard');
+
+      const from = location.state?.from?.pathname || '/';
+      const isProtectedRoute = !['/', '/login', '/register'].includes(from);
+      navigate(isProtectedRoute ? from : '/', { replace: true });
     } catch (error) {
       toast.error('Login failed. Check your credentials.');
       console.error('Login error:', error);
@@ -41,8 +45,17 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex flex-col items-center justify-center min-h-screen">
       <Toaster richColors position="top-right" />
+
+      {/* Home button */}
+      <Link
+        to="/"
+        className="absolute top-4 left-4 text-sm font-medium text-white bg-gray-800 px-3 py-1 rounded hover:bg-gray-700 transition"
+      >
+        ← Home
+      </Link>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -82,12 +95,6 @@ const Login = () => {
                 {loading ? 'Logging in...' : 'Login'}
               </Button>
             </form>
-            <p className="mt-2 text-sm text-center">
-              Don’t have an account?{' '}
-              <a href="/register" className="text-blue-400 hover:underline">
-                Register
-              </a>
-            </p>
           </CardContent>
         </Card>
       </motion.div>

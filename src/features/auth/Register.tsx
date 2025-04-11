@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // ⬅ added Link
 import api from '@/lib/api';
 import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/sonner';
@@ -34,8 +34,17 @@ const Register = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex flex-col items-center justify-center min-h-screen">
       <Toaster richColors position="top-right" />
+
+      {/* Home button */}
+      <Link
+        to="/"
+        className="absolute top-4 left-4 text-sm font-medium text-white bg-gray-800 px-3 py-1 rounded hover:bg-gray-700 transition"
+      >
+        ← Home
+      </Link>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -104,9 +113,9 @@ const Register = () => {
             </form>
             <p className="mt-2 text-sm text-center">
               Already have an account?{' '}
-              <a href="/login" className="text-blue-400 hover:underline">
+              <Link to="/login" className="text-blue-400 hover:underline">
                 Login
-              </a>
+              </Link>
             </p>
           </CardContent>
         </Card>
