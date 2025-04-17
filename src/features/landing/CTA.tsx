@@ -215,7 +215,7 @@ const CTA = () => {
                   asChild
                   variant="outline"
                   size="lg"
-                  className="rounded-3xl py-7 px-8 font-medium text-lg backdrop-blur-sm border border-white/20 bg-white/5 hover:bg-white/10 transition-all duration-300"
+                  className="rounded-3xl py-7 px-8 text-white font-medium text-lg backdrop-blur-sm border border-white/20 bg-white/5 hover:bg-white/10 transition-all duration-300"
                 >
                   <Link to="/demo">Watch Demo</Link>
                 </Button>

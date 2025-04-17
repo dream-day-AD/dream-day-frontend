@@ -260,7 +260,7 @@ export const Navbar = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-300"
+                      className="rounded-3xl text-white border border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-300"
                     >
                       Logout
                     </Button>
@@ -383,7 +383,7 @@ export const Navbar = () => {
                   >
                     <Button
                       onClick={handleLogout}
-                      className="w-full rounded-2xl bg-gradient-to-r from-red-600/80 to-red-700/80 text-white hover:from-red-700 hover:to-red-800"
+                      className="w-full rounded-2xl text-white bg-gradient-to-r from-red-600/80 to-red-700/80 hover:from-red-700 hover:to-red-800"
                     >
                       Logout
                     </Button>

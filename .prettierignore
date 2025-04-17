@@ -1,0 +1,16 @@
+# Ignore build output
+dist
+build
+
+# Ignore node_modules
+node_modules
+
+# Ignore generated files
+*.log
+*.tsbuildinfo
+
+# Ignore coverage reports
+coverage
+
+# Ignore Vite cache
+.vite
