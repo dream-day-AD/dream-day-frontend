@@ -8,8 +8,7 @@ import api from '@/lib/api';
 import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/sonner';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Eye, EyeOff, UserPlus, ChevronDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { ArrowLeft, Eye, EyeOff, UserPlus } from 'lucide-react';
 
 const Register = () => {
   // Dark blue color palette variables
@@ -24,10 +23,8 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [role, setRole] = useState('client');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
 
   // Animation variants
@@ -54,26 +51,41 @@ const Register = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+  
     try {
-      await api.post('/auth/register', { email, password, name, role });
-      
-      // Success animation and toast
+      console.log('Sending registration data:', { email, password, name });
+      await api.post('/auth/register', { email, password, name });
       toast.success('Registration successful!', {
         description: 'Your account has been created. Please log in.',
         icon: '🎉',
       });
-      
-      // Add a small delay before navigating for better UX
       setTimeout(() => {
         navigate('/login');
       }, 1000);
     } catch (error) {
-      // Error animation and toast
-      toast.error('Registration failed', {
-        description: 'Please check your information and try again.',
-        icon: '⚠️',
-      });
+      console.log('Full error response:', error.response?.data);
+      if (error.response && error.response.data) {
+        let errorMessage = 'Unknown error';
+        if (Array.isArray(error.response.data)) {
+          // Handle array of IdentityError objects
+          errorMessage = error.response.data.map(e => e.description || e).join(', ');
+        } else if (error.response.data.errors) {
+          // Handle errors object (if applicable)
+          errorMessage = Object.values(error.response.data.errors).flat().join(', ');
+        } else if (error.response.data.message) {
+          // Handle single message
+          errorMessage = error.response.data.message;
+        }
+        toast.error('Registration failed', {
+          description: errorMessage,
+          icon: '⚠️',
+        });
+      } else {
+        toast.error('Registration failed', {
+          description: 'An unexpected error occurred.',
+          icon: '⚠️',
+        });
+      }
       console.error('Register error:', error);
     } finally {
       setLoading(false);
@@ -82,25 +94,6 @@ const Register = () => {
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
-  };
-
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
-
-  const selectRole = (selectedRole) => {
-    setRole(selectedRole);
-    setIsDropdownOpen(false);
-  };
-
-  const roleOptions = [
-    { value: 'client', label: 'Client - Planning my wedding' },
-    { value: 'planner', label: 'Planner - Professional wedding planner' },
-    { value: 'admin', label: 'Admin - System administrator' },
-  ];
-
-  const getRoleLabel = () => {
-    return roleOptions.find(option => option.value === role)?.label || 'Select a role';
   };
 
   return (
@@ -260,73 +253,6 @@ const Register = () => {
                 <p className="text-xs text-blue-100/50 mt-1.5">
                   Must be at least 8 characters with a mix of letters, numbers & symbols
                 </p>
-              </motion.div>
-              
-              <motion.div variants={itemVariants}>
-                <Label htmlFor="role" className="text-sm font-medium text-blue-100 mb-1.5 block">
-                  I am a
-                </Label>
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={toggleDropdown}
-                    className={cn(
-                      "w-full flex items-center justify-between bg-white/5 border border-white/10 text-white rounded-xl h-11 px-3 focus:border-blue-400/60 transition-all duration-300",
-                      isDropdownOpen && "border-blue-400/60"
-                    )}
-                    aria-expanded={isDropdownOpen}
-                    aria-haspopup="listbox"
-                  >
-                    <span className={cn("text-sm", !role && "text-blue-100/40")}>
-                      {getRoleLabel()}
-                    </span>
-                    <ChevronDown 
-                      size={18} 
-                      className={cn(
-                        "text-blue-100/60 transition-transform duration-300",
-                        isDropdownOpen && "transform rotate-180"
-                      )} 
-                    />
-                  </button>
-                  
-                  {isDropdownOpen && (
-                    <motion.div 
-                      className="absolute z-10 w-full mt-1 rounded-xl overflow-hidden backdrop-blur-md border border-white/10 shadow-lg" 
-                      style={{
-                        background: `linear-gradient(135deg, rgba(42, 67, 101, 0.8) 0%, rgba(26, 41, 64, 0.9) 100%)`,
-                      }}
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <ul 
-                        role="listbox" 
-                        aria-labelledby="role-button"
-                        className="py-1"
-                      >
-                        {roleOptions.map((option) => (
-                          <li key={option.value}>
-                            <button
-                              type="button"
-                              className={cn(
-                                "w-full text-left px-3 py-2.5 text-sm transition-colors",
-                                role === option.value 
-                                  ? "bg-blue-500/20 text-white" 
-                                  : "text-blue-100/80 hover:bg-white/5 hover:text-white"
-                              )}
-                              onClick={() => selectRole(option.value)}
-                              role="option"
-                              aria-selected={role === option.value}
-                            >
-                              {option.label}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    </motion.div>
-                  )}
-                </div>
               </motion.div>
               
               <motion.div variants={itemVariants} className="pt-2">

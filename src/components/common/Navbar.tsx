@@ -27,11 +27,11 @@ export const Navbar = () => {
 
   // Dark blue color palette variables
   const colors = {
-    darkBlue1: '#0A1929', // Darkest blue
-    darkBlue2: '#11294D', // Dark blue
-    darkBlue3: '#1A3A6E', // Medium blue
-    darkBlue4: '#2E4E8F', // Lighter accent blue
-    lightAccent: '#4C9FE6', // Light blue accent
+    darkBlue1: '#0A1929',
+    darkBlue2: '#11294D',
+    darkBlue3: '#1A3A6E',
+    darkBlue4: '#2E4E8F',
+    lightAccent: '#4C9FE6',
   };
 
   // Handle scroll effect
@@ -73,6 +73,9 @@ export const Navbar = () => {
 
     const links = [
       { to: '/dashboard', label: 'Dashboard' },
+      { to: '/events', label: 'Events' }, // Links to EventList
+      { to: '/venues', label: 'Venues' },
+      { to: '/bookings', label: 'Bookings' }, // Links to BookingList
       { to: '/vendors', label: 'Vendors' },
       { to: '/checklist', label: 'Checklist' },
       { to: '/guests', label: 'Guests' },
